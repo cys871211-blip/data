@@ -3,269 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주요 도시 인구 현황 비교 인포그래픽</title>
+    <title>전라남도 반려동물 의료 접근성 분석</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Noto+Sans+KR:wght@100..900&display=swap');
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Green 50 */
         }
-        .chart-bar {
-            transition: width 0.5s ease-in-out;
-        }
-        /* D3.js 툴팁 스타일 */
-        .d3-tooltip {
-            position: absolute;
-            text-align: center;
-            width: auto;
-            height: auto;
-            padding: 8px;
-            font: 12px sans-serif;
-            background: lightsteelblue;
-            border: 0px;
-            border-radius: 8px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
+        .bar-container {
+            transition: width 1.0s ease-out;
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-6 md:p-8">
-    <!-- 순천시 인포그래픽 -->
-    <div id="suncheon-infographic" class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">순천시 인구 현황</h1>
-            <p class="text-gray-500 mt-2 text-lg">Suncheon City Population Infographic</p>
-            <p class="text-sm text-gray-400 mt-1">(2025년 7월 31일 기준)</p>
-        </header>
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-            <div class="bg-sky-50 p-5 rounded-xl text-center"><p class="text-sm text-sky-600 font-semibold">총 인구</p><p id="total-population-suncheon" class="text-3xl font-bold text-sky-800 mt-1">0</p></div>
-            <div class="bg-blue-50 p-5 rounded-xl text-center"><p class="text-sm text-blue-600 font-semibold">남자</p><p id="male-population-suncheon" class="text-3xl font-bold text-blue-800 mt-1">0</p></div>
-            <div class="bg-pink-50 p-5 rounded-xl text-center"><p class="text-sm text-pink-600 font-semibold">여자</p><p id="female-population-suncheon" class="text-3xl font-bold text-pink-800 mt-1">0</p></div>
-            <div class="bg-indigo-50 p-5 rounded-xl text-center"><p class="text-sm text-indigo-600 font-semibold">세대수</p><p id="households-suncheon" class="text-3xl font-bold text-indigo-800 mt-1">0</p></div>
-        </section>
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 bg-gray-50 p-6 rounded-xl">
-                <h2 class="text-xl font-bold text-gray-700 mb-4 text-center">성별 인구 비율</h2>
-                <div id="gender-chart-suncheon" class="flex justify-center items-center h-48"></div>
-                <div class="flex justify-around mt-4">
-                    <div class="text-center"><div class="w-4 h-4 rounded-full bg-blue-400 inline-block mr-2"></div><span class="font-semibold">남자</span><p id="male-percentage-suncheon" class="text-lg font-bold text-blue-800"></p></div>
-                    <div class="text-center"><div class="w-4 h-4 rounded-full bg-pink-400 inline-block mr-2"></div><span class="font-semibold">여자</span><p id="female-percentage-suncheon" class="text-lg font-bold text-pink-800"></p></div>
-                </div>
-            </div>
-            <div class="lg:col-span-2 bg-gray-50 p-6 rounded-xl">
-                <h2 class="text-xl font-bold text-gray-700 mb-4">읍면동별 인구수</h2>
-                <div id="population-by-district-chart-suncheon" class="w-full overflow-x-auto"><svg class="w-full"></svg></div>
-            </div>
-        </section>
-    </div>
+<body class="p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl">
+        <h1 class="text-3xl font-extrabold text-gray-800 mb-2 border-b-4 border-emerald-600 pb-2">
+            🐈 전라남도 시·군별 반려동물 의료 접근성
+        </h1>
+        <p class="text-sm text-gray-600 mb-6">
+            분석 지표: 동물병원 1개당 담당하는 추정 반려동물 수 (낮을수록 접근성이 높음 = 병원 많음)
+        </p>
 
-    <!-- 비교 도시 인포그래픽 -->
-    <div class="text-center my-12">
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-700">유사 인구 구조 도시 비교</h2>
-        <p class="text-gray-500 mt-2">Comparison with Cities of Similar Population</p>
-    </div>
+        <!-- 데이터 원본 및 추정 고지 -->
+        <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 rounded-lg mb-8">
+            <p class="text-sm text-emerald-800 font-semibold">
+                ⚠️ 데이터 출처 고지
+            </p>
+            <p class="text-xs text-emerald-700 mt-1">
+                전라남도 시·군별 동물병원 및 반려동물 등록 수는 공식 자료가 없어 **인구 및 지역 특성을 고려하여 추정(Mock Data)한 값**입니다.
+            </p>
+        </div>
 
-    <!-- 익산시 인포그래픽 -->
-    <div id="iksan-infographic" class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">익산시 인구 현황</h1>
-            <p class="text-gray-500 mt-2 text-lg">Iksan City Population Infographic</p>
-            <p class="text-sm text-gray-400 mt-1">(2025년 7월 31일 기준)</p>
-        </header>
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-            <div class="bg-sky-50 p-5 rounded-xl text-center"><p class="text-sm text-sky-600 font-semibold">총 인구</p><p id="total-population-iksan" class="text-3xl font-bold text-sky-800 mt-1">0</p></div>
-            <div class="bg-blue-50 p-5 rounded-xl text-center"><p class="text-sm text-blue-600 font-semibold">남자</p><p id="male-population-iksan" class="text-3xl font-bold text-blue-800 mt-1">0</p></div>
-            <div class="bg-pink-50 p-5 rounded-xl text-center"><p class="text-sm text-pink-600 font-semibold">여자</p><p id="female-population-iksan" class="text-3xl font-bold text-pink-800 mt-1">0</p></div>
-            <div class="bg-indigo-50 p-5 rounded-xl text-center"><p class="text-sm text-indigo-600 font-semibold">세대수</p><p id="households-iksan" class="text-3xl font-bold text-indigo-800 mt-1">0</p></div>
-        </section>
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 bg-gray-50 p-6 rounded-xl">
-                <h2 class="text-xl font-bold text-gray-700 mb-4 text-center">성별 인구 비율</h2>
-                <div id="gender-chart-iksan" class="flex justify-center items-center h-48"></div>
-                <div class="flex justify-around mt-4">
-                    <div class="text-center"><div class="w-4 h-4 rounded-full bg-blue-400 inline-block mr-2"></div><span class="font-semibold">남자</span><p id="male-percentage-iksan" class="text-lg font-bold text-blue-800"></p></div>
-                    <div class="text-center"><div class="w-4 h-4 rounded-full bg-pink-400 inline-block mr-2"></div><span class="font-semibold">여자</span><p id="female-percentage-iksan" class="text-lg font-bold text-pink-800"></p></div>
-                </div>
+        <div id="chart-container" class="space-y-4">
+            <h3 class="text-xl font-bold text-gray-700 mb-4">시·군별 접근성 막대 차트 (전남 순위)</h3>
+            <p class="text-center text-gray-500" id="loading-message">차트 데이터 로딩 중...</p>
+        </div>
+
+        <div class="mt-12 pt-6 border-t border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-3">병원당 추정 반려동물 수 상세 정보 (전라남도)</h2>
+            <div id="data-table" class="overflow-x-auto">
+                <!-- Data Table will be rendered here -->
             </div>
-            <div class="lg:col-span-2 bg-gray-50 p-6 rounded-xl">
-                <h2 class="text-xl font-bold text-gray-700 mb-4">읍면동별 인구수</h2>
-                <div id="population-by-district-chart-iksan" class="w-full overflow-x-auto"><svg class="w-full"></svg></div>
-            </div>
-        </section>
-    </div>
-    
-    <!-- 군산시 인포그래픽 -->
-    <div id="gunsan-infographic" class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">군산시 인구 현황</h1>
-            <p class="text-gray-500 mt-2 text-lg">Gunsan City Population Infographic</p>
-            <p class="text-sm text-gray-400 mt-1">(2025년 7월 31일 기준)</p>
-        </header>
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-            <div class="bg-sky-50 p-5 rounded-xl text-center"><p class="text-sm text-sky-600 font-semibold">총 인구</p><p id="total-population-gunsan" class="text-3xl font-bold text-sky-800 mt-1">0</p></div>
-            <div class="bg-blue-50 p-5 rounded-xl text-center"><p class="text-sm text-blue-600 font-semibold">남자</p><p id="male-population-gunsan" class="text-3xl font-bold text-blue-800 mt-1">0</p></div>
-            <div class="bg-pink-50 p-5 rounded-xl text-center"><p class="text-sm text-pink-600 font-semibold">여자</p><p id="female-population-gunsan" class="text-3xl font-bold text-pink-800 mt-1">0</p></div>
-            <div class="bg-indigo-50 p-5 rounded-xl text-center"><p class="text-sm text-indigo-600 font-semibold">세대수</p><p id="households-gunsan" class="text-3xl font-bold text-indigo-800 mt-1">0</p></div>
-        </section>
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 bg-gray-50 p-6 rounded-xl">
-                <h2 class="text-xl font-bold text-gray-700 mb-4 text-center">성별 인구 비율</h2>
-                <div id="gender-chart-gunsan" class="flex justify-center items-center h-48"></div>
-                <div class="flex justify-around mt-4">
-                    <div class="text-center"><div class="w-4 h-4 rounded-full bg-blue-400 inline-block mr-2"></div><span class="font-semibold">남자</span><p id="male-percentage-gunsan" class="text-lg font-bold text-blue-800"></p></div>
-                    <div class="text-center"><div class="w-4 h-4 rounded-full bg-pink-400 inline-block mr-2"></div><span class="font-semibold">여자</span><p id="female-percentage-gunsan" class="text-lg font-bold text-pink-800"></p></div>
-                </div>
-            </div>
-            <div class="lg:col-span-2 bg-gray-50 p-6 rounded-xl">
-                <h2 class="text-xl font-bold text-gray-700 mb-4">읍면동별 인구수</h2>
-                <div id="population-by-district-chart-gunsan" class="w-full overflow-x-auto"><svg class="w-full"></svg></div>
-            </div>
-        </section>
+        </div>
+
     </div>
 
     <script>
-        // 데이터 (행정안전부_지역별(행정동) 성별 연령별 주민등록 인구수_20250731.csv 파일 기반)
-        const suncheonData = [
-            { name: '승주읍', total: 2474, male: 1269, female: 1205, households: 1417 }, { name: '주암면', total: 3108, male: 1599, female: 1509, households: 1794 }, { name: '송광면', total: 1395, male: 728, female: 667, households: 839 }, { name: '외서면', total: 789, male: 414, female: 375, households: 489 }, { name: '낙안면', total: 3232, male: 1612, female: 1620, households: 1787 }, { name: '별량면', total: 4768, male: 2451, female: 2317, households: 2689 }, { name: '상사면', total: 2419, male: 1276, female: 1143, households: 1373 }, { name: '해룡면', total: 57424, male: 29019, female: 28405, households: 23647 }, { name: '향동', total: 4154, male: 2092, female: 2062, households: 2276 }, { name: '매곡동', total: 6013, male: 3004, female: 3009, households: 3121 }, { name: '삼산동', total: 10609, male: 5275, female: 5334, households: 5129 }, { name: '조곡동', total: 4851, male: 2420, female: 2431, households: 2519 }, { name: '덕연동', total: 42368, male: 21105, female: 21263, households: 21251 }, { name: '풍덕동', total: 7815, male: 3881, female: 3934, households: 3778 }, { name: '남제동', total: 8097, male: 3970, female: 4127, households: 3959 }, { name: '저전동', total: 3719, male: 1845, female: 1874, households: 2111 }, { name: '장천동', total: 2649, male: 1324, female: 1325, households: 1533 }, { name: '중앙동', total: 3379, male: 1693, female: 1686, households: 2043 }, { name: '도사동', total: 12763, male: 6358, female: 6405, households: 5752 }, { name: '왕조1동', total: 32087, male: 15856, female: 16231, households: 15447 }, { name: '왕조2동', total: 26436, male: 13032, female: 13404, households: 11211 }, { name: '서면', total: 11046, male: 5693, female: 5353, households: 5236 }, { name: '황전면', total: 3126, male: 1599, female: 1527, households: 1819 }, { name: '월등면', total: 1690, male: 846, female: 844, households: 978 },
+        const analysisData = [
+            // Jeollanam-do Data (병원당 반려동물 수 낮은 순 = 접근성 높은 순으로 정렬)
+            {"district": "나주시", "hospitals": 6, "pets": 7000, "ratio": 1167},
+            {"district": "순천시", "hospitals": 15, "pets": 18000, "ratio": 1200},
+            {"district": "여수시", "hospitals": 13, "pets": 16000, "ratio": 1231},
+            {"district": "광양시", "hospitals": 8, "pets": 10000, "ratio": 1250},
+            {"district": "목포시", "hospitals": 10, "pets": 13000, "ratio": 1300},
+            {"district": "영광군", "hospitals": 4, "pets": 5500, "ratio": 1375},
+            {"district": "구례군", "hospitals": 1, "pets": 1500, "ratio": 1500},
+            {"district": "해남군", "hospitals": 3, "pets": 5000, "ratio": 1667}
         ];
-        
-        const iksanData = [
-            { name: '함열읍', total: 6638, male: 3375, female: 3263, households: 3411 }, { name: '오산면', total: 7681, male: 4096, female: 3585, households: 3785 }, { name: '황등면', total: 7201, male: 3702, female: 3499, households: 3712 }, { name: '함라면', total: 2217, male: 1137, female: 1080, households: 1188 }, { name: '웅포면', total: 1502, male: 781, female: 721, households: 844 }, { name: '성당면', total: 1745, male: 902, female: 843, households: 956 }, { name: '용안면', total: 2187, male: 1118, female: 1069, households: 1241 }, { name: '낭산면', total: 2795, male: 1488, female: 1307, households: 1502 }, { name: '망성면', total: 2977, male: 1561, female: 1416, households: 1533 }, { name: '여산면', total: 2998, male: 1539, female: 1459, households: 1621 }, { name: '금마면', total: 5310, male: 2703, female: 2607, households: 2798 }, { name: '왕궁면', total: 4792, male: 2555, female: 2237, households: 2611 }, { name: '춘포면', total: 3950, male: 2017, female: 1933, households: 2087 }, { name: '삼기면', total: 2478, male: 1297, female: 1181, households: 1301 }, { name: '중앙동', total: 4051, male: 2056, female: 1995, households: 2367 }, { name: '평화동', total: 5241, male: 2619, female: 2622, households: 2785 }, { name: '인화동', total: 5410, male: 2779, female: 2631, households: 3011 }, { name: '동산동', total: 20886, male: 10476, female: 10410, households: 10112 }, { name: '마동', total: 8789, male: 4371, female: 4418, households: 4432 }, { name: '남중동', total: 5790, male: 2886, female: 2904, households: 3102 }, { name: '모현동', total: 42231, male: 20822, female: 21409, households: 18123 }, { name: '송학동', total: 13247, male: 6614, female: 6633, households: 5987 }, { name: '영등1동', total: 21768, male: 10730, female: 11038, households: 9541 }, { name: '영등2동', total: 11631, male: 5707, female: 5924, households: 5211 }, { name: '어양동', total: 22894, male: 11202, female: 11692, households: 9812 }, { name: '팔봉동', total: 7201, male: 3745, female: 3456, households: 3511 }, { name: '삼성동', total: 22130, male: 10996, female: 11134, households: 10023 },
-        ];
 
-        const gunsanData = [
-            { name: '옥구읍', total: 2548, male: 1329, female: 1219, households: 1365 }, { name: '옥산면', total: 2481, male: 1294, female: 1187, households: 1287 }, { name: '회현면', total: 3167, male: 1610, female: 1557, households: 1655 }, { name: '옥도면', total: 3671, male: 2031, female: 1640, households: 2210 }, { name: '옥서면', total: 4618, male: 2471, female: 2147, households: 2455 }, { name: '임피면', total: 2888, male: 1471, female: 1417, households: 1588 }, { name: '서수면', total: 2457, male: 1279, female: 1178, households: 1344 }, { name: '대야면', total: 5258, male: 2668, female: 2590, households: 2877 }, { name: '개정면', total: 3870, male: 1957, female: 1913, households: 1988 }, { name: '성산면', total: 3260, male: 1686, female: 1574, households: 1681 }, { name: '나포면', total: 2062, male: 1060, female: 1002, households: 1143 }, { name: '해신동', total: 4799, male: 2496, female: 2303, households: 2781 }, { name: '월명동', total: 4893, male: 2530, female: 2363, households: 2987 }, { name: '신풍동', total: 6101, male: 3042, female: 3059, households: 3122 }, { name: '삼학동', total: 6185, male: 3122, female: 3063, households: 3211 }, { name: '중앙동', total: 4011, male: 2068, female: 1943, households: 2455 }, { name: '흥남동', total: 7520, male: 3762, female: 3758, households: 3876 }, { name: '조촌동', total: 41814, male: 20701, female: 21113, households: 17890 }, { name: '경암동', total: 7201, male: 3641, female: 3560, households: 3788 }, { name: '구암동', total: 11210, male: 5612, female: 5598, households: 5210 }, { name: '개정동', total: 5897, male: 2981, female: 2916, households: 2654 }, { name: '수송동', total: 52319, male: 25777, female: 26542, households: 21899 }, { name: '나운1동', total: 11211, male: 5543, female: 5668, households: 5543 }, { name: '나운2동', total: 20102, male: 9912, female: 10190, households: 8766 }, { name: '나운3동', total: 24898, male: 12221, female: 12677, households: 10111 }, { name: '소룡동', total: 14930, male: 7851, female: 7079, households: 7899 }, { name: '미성동', total: 10111, male: 5269, female: 4842, households: 4911 },
-        ];
+        analysisData.sort((a, b) => a.ratio - b.ratio);
 
-        document.addEventListener('DOMContentLoaded', () => {
-            createInfographic('suncheon', suncheonData);
-            createInfographic('iksan', iksanData);
-            createInfographic('gunsan', gunsanData);
-        });
+        const MAX_RATIO = Math.max(...analysisData.map(d => d.ratio));
+        const chartContainer = document.getElementById('chart-container');
+        const dataTableContainer = document.getElementById('data-table');
 
-        function createInfographic(cityId, populationData) {
-            // 총계 계산
-            const totalPopulation = populationData.reduce((sum, d) => sum + d.total, 0);
-            const totalMale = populationData.reduce((sum, d) => sum + d.male, 0);
-            const totalFemale = populationData.reduce((sum, d) => sum + d.female, 0);
-            const totalHouseholds = populationData.reduce((sum, d) => sum + d.households, 0);
-
-            // 숫자 포맷팅 함수
-            const formatNumber = (num) => num.toLocaleString();
-
-            // 핵심 지표 업데이트
-            document.getElementById(`total-population-${cityId}`).textContent = formatNumber(totalPopulation);
-            document.getElementById(`male-population-${cityId}`).textContent = formatNumber(totalMale);
-            document.getElementById(`female-population-${cityId}`).textContent = formatNumber(totalFemale);
-            document.getElementById(`households-${cityId}`).textContent = formatNumber(totalHouseholds);
-
-            // 성별 비율 계산 및 업데이트
-            const malePercentage = ((totalMale / totalPopulation) * 100).toFixed(1);
-            const femalePercentage = ((totalFemale / totalPopulation) * 100).toFixed(1);
-            document.getElementById(`male-percentage-${cityId}`).textContent = `${malePercentage}%`;
-            document.getElementById(`female-percentage-${cityId}`).textContent = `${femalePercentage}%`;
-            
-            // 차트 그리기
-            drawGenderChart(cityId, malePercentage, femalePercentage);
-            drawDistrictChart(cityId, populationData);
+        function formatNumber(num) {
+            return new Intl.NumberFormat('ko-KR').format(num);
         }
 
-        function drawGenderChart(cityId, malePercent, femalePercent) {
-            const data = [
-                { label: '남자', value: malePercent, color: '#60a5fa' },
-                { label: '여자', value: femalePercent, color: '#f472b6' }
-            ];
+        function renderChart() {
+            document.getElementById('loading-message').style.display = 'none';
+            let chartHtml = '';
 
-            const width = 180;
-            const height = 180;
-            const radius = Math.min(width, height) / 2;
+            analysisData.forEach(data => {
+                const barWidthPercentage = (data.ratio / MAX_RATIO) * 100;
+                
+                let barColor = 'bg-emerald-600';
+                if (data.ratio > MAX_RATIO * 0.75) {
+                    barColor = 'bg-red-600';
+                } else if (data.ratio > MAX_RATIO * 0.5) {
+                    barColor = 'bg-amber-500';
+                } else if (data.ratio > MAX_RATIO * 0.25) {
+                    barColor = 'bg-sky-600';
+                }
 
-            const svg = d3.select(`#gender-chart-${cityId}`)
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .append("g")
-                .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-            const pie = d3.pie().value(d => d.value).sort(null);
-            const arc = d3.arc().innerRadius(radius * 0.6).outerRadius(radius);
-
-            svg.selectAll('path')
-                .data(pie(data))
-                .enter()
-                .append('path')
-                .attr('d', arc)
-                .attr('fill', d => d.data.color)
-                .attr('stroke', 'white')
-                .style('stroke-width', '2px');
+                chartHtml += `
+                    <div class="flex items-center space-x-4 p-3 rounded-lg shadow-md hover:shadow-xl transition duration-300 bg-white">
+                        <div class="w-1/4 sm:w-1/5 font-semibold text-lg text-gray-800 min-w-[70px]">${data.district}</div>
+                        <div class="w-3/4 sm:w-4/5 flex flex-col justify-center relative">
+                            <div 
+                                class="bar-container h-8 rounded-md ${barColor} flex items-center justify-start text-white text-xs font-bold whitespace-nowrap" 
+                                style="width: ${barWidthPercentage > 1 ? barWidthPercentage : 1}%"
+                                title="병원당 추정 반려동물 수: ${formatNumber(data.ratio)} 마리"
+                            >
+                                <span class="pl-2">${formatNumber(data.ratio)} 마리</span>
+                            </div>
+                            <div class="absolute right-0 top-0 h-8 flex items-center pr-2 text-gray-700 text-sm font-medium">
+                                (${data.hospitals}개 병원 / 추정 ${formatNumber(data.pets)}마리)
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            chartContainer.innerHTML = chartHtml;
         }
 
-        function drawDistrictChart(cityId, data) {
-            const sortedData = [...data].sort((a, b) => b.total - a.total);
+        function renderTable() {
+            let tableHtml = `
+                <table class="min-w-full divide-y divide-gray-300 rounded-lg overflow-hidden">
+                    <thead class="bg-emerald-600 text-white">
+                        <tr>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6">시/군</th>
+                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold">동물병원 수</th>
+                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold">추정 반려동물 수</th>
+                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold bg-emerald-700 rounded-tr-lg">병원당 추정 반려동물 수 (접근성 지표)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+            `;
 
-            const margin = { top: 20, right: 40, bottom: 40, left: 60 };
-            const height = 600;
-            const width = 600;
+            analysisData.forEach(data => {
+                tableHtml += `
+                    <tr class="hover:bg-emerald-50">
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">${data.district}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-right">${formatNumber(data.hospitals)} 개</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-right">${formatNumber(data.pets)} 마리</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm font-bold text-gray-800 text-right">${formatNumber(data.ratio)} 마리</td>
+                    </tr>
+                `;
+            });
 
-            const svg = d3.select(`#population-by-district-chart-${cityId} svg`)
-                .attr("viewBox", `0 0 ${width} ${height}`);
-
-            const x = d3.scaleLinear()
-                .domain([0, d3.max(sortedData, d => d.total)])
-                .range([margin.left, width - margin.right]);
-
-            const y = d3.scaleBand()
-                .domain(sortedData.map(d => d.name))
-                .range([margin.top, height - margin.bottom])
-                .padding(0.2);
-
-            svg.append("g")
-                .attr("transform", `translate(0,${height - margin.bottom})`)
-                .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(",")))
-                .selectAll("text")
-                .style("font-size", "12px");
-
-            svg.append("g")
-                .attr("transform", `translate(${margin.left},0)`)
-                .call(d3.axisLeft(y))
-                .selectAll("text")
-                .style("font-size", "12px");
-
-            const barColors = ["#2dd4bf", "#60a5fa", "#f472b6"];
-
-            svg.selectAll(".bar")
-                .data(sortedData)
-                .enter()
-                .append("rect")
-                .attr("class", "bar chart-bar")
-                .attr("y", d => y(d.name))
-                .attr("height", y.bandwidth())
-                .attr("x", margin.left)
-                .attr("width", 0)
-                .attr("fill", (d, i) => barColors[i % barColors.length])
-                .transition()
-                .duration(800)
-                .attr("width", d => x(d.total) - margin.left);
-
-            svg.selectAll(".label")
-                .data(sortedData)
-                .enter()
-                .append("text")
-                .attr("class", "label")
-                .attr("y", d => y(d.name) + y.bandwidth() / 2)
-                .attr("x", d => x(d.total) + 5)
-                .attr("dy", ".35em")
-                .style("font-size", "11px")
-                .style("fill", "#333")
-                .style("opacity", 0)
-                .text(d => d.total.toLocaleString())
-                .transition()
-                .delay(800)
-                .duration(500)
-                .style("opacity", 1);
+            tableHtml += `
+                    </tbody>
+                </table>
+            `;
+            dataTableContainer.innerHTML = tableHtml;
         }
+
+        window.onload = () => {
+            renderChart();
+            renderTable();
+        };
+
     </script>
 </body>
 </html>
